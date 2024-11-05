@@ -7,7 +7,7 @@ interface ToolbarProps {
   onBold: () => void;
   onItalic: () => void;
   onUnderline: () => void;
-  onFontChange: (font: string) => void; // New prop for font change
+  onFontChange: (font: string) => void; 
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -40,7 +40,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <i className="fas fa-underline"></i>
       </button>
       <select 
-        onChange={(e) => onFontChange(e.target.value)} // Call font change function
+        onChange={(e) => onFontChange(e.target.value)}  
         className="text-white bg-transparent border border-white rounded p-1"
       >
         <option value="Arial">Arial</option>

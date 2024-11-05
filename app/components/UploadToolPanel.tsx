@@ -28,13 +28,13 @@ const UploadToolPanel: React.FC<UploadToolPanelProps> = ({
     }
   };
 
-  // Add the uploaded image to the canvas
+   
   const handleAddImage = () => {
     if (uploadedImage) {
       addImageToCanvas(uploadedImage);
-      setUploadedImage(null); // Clear the preview
-      setSelectedFile(null); // Clear the file input
-      onClose(); // Close the panel after adding the image
+      setUploadedImage(null);  
+      setSelectedFile(null);  
+      onClose();  
     }
   };
 
@@ -58,10 +58,10 @@ const UploadToolPanel: React.FC<UploadToolPanelProps> = ({
           className="border mb-4 p-2 w-full"
         />
 
-        {/* Drag and Drop Message */}
+     
         <p className="text-gray-600 mb-4">Drag and drop your files here</p>
 
-        {/* Preview Selected Image */}
+        
         {uploadedImage && (
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-2">Selected Image</h3>

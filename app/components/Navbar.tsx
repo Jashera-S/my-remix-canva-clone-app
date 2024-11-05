@@ -8,28 +8,25 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onUndo, onRedo }) => {
   return (
     <div className="fixed top-0 left-0 bg-gradient-to-r from-[#00C4CC] to-[#A3D9D9] text-white w-full flex items-center justify-between p-4 z-10">
-      {/* Logo */}
       <div>
         <img
-          src="/Canvalogo.png" // Local logo path
+          src="/Canvalogo.png"
           alt="Canva Logo"
           className="h-8"
         />
       </div>
 
-      {/* Title */}
       <div className="flex-grow text-center">
         <span className="text-xl font-bold">Untitled Design</span>
       </div>
 
-      {/* Toolbar Buttons */}
       <div className="flex items-center space-x-4">
         <button
           className="bg-[#00C4CC] text-white p-2 rounded transition duration-300 hover:bg-[#00A2A7] flex items-center"
           onClick={onUndo}
           title="Undo"
         >
-          <i className="fas fa-undo"></i> {/* Font Awesome Undo Icon */}
+          <i className="fas fa-undo"></i>
         </button>
 
         <button
@@ -37,7 +34,7 @@ const Navbar: React.FC<NavbarProps> = ({ onUndo, onRedo }) => {
           onClick={onRedo}
           title="Redo"
         >
-          <i className="fas fa-redo"></i> {/* Font Awesome Redo Icon */}
+          <i className="fas fa-redo"></i>
         </button>
 
         <button

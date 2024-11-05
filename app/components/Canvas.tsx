@@ -11,7 +11,7 @@ export interface CanvasHandle {
   toggleItalic: () => void;
   toggleUnderline: () => void;
   setFontFamily: (font: string) => void;
-  addShapeToCanvas: (shape: string, color: string, size: number) => void; // New method for adding shapes
+  addShapeToCanvas: (shape: string, color: string, size: number) => void;  
 }
 
 const Canvas = forwardRef<CanvasHandle>((_, ref) => {
@@ -31,7 +31,7 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
     toggleItalic,
     toggleUnderline,
     setFontFamily,
-    addShapeToCanvas, // Expose the new method
+    addShapeToCanvas,  
   }));
 
   const addTextToCanvas = (text: string, options: { fontSize?: number; fill?: string }) => {
@@ -40,8 +40,7 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
       return;
     }
 
-    saveState(); // Save the current state for undo/redo
-
+    saveState();  
     const textBox = new fabric.Textbox(text, {
       left: 50,
       top: 50,
@@ -49,7 +48,7 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
       height: 100,
       fontSize: options.fontSize || 18,
       fill: options.fill || '#000',
-      textAlign: 'left',
+      textAlign: 'center',
       editable: true,
       padding: 10,
       borderColor: '#3498db',
@@ -88,21 +87,16 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
 
     fabric.Image.fromURL(imageUrl, (img: fabric.Image) => {
         img.set({
-            left: 100, // Position of the image on the canvas
+            left: 100, 
             top: 100,
             selectable: true,
             editable: true,
       padding: 10,
-      borderColor: '#3498db',
-      cornerColor: '#3498db',
-      cornerStrokeColor: '#3498db',
-      transparentCorners: false,
-      strokeWidth: 2,
-      cornerStyle: 'circle',
+         
       hasBorders: true,
       hasControls: true,
         });
-        saveState(); // Save the current state for undo/redo
+        saveState();  
         canvasInstance.current?.add(img);
         canvasInstance.current?.renderAll();
         console.log("Image added to canvas:", img); // Debug log
@@ -123,7 +117,7 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
     if (!canvasInstance.current) return;
 
     console.log(`Adding shape: ${shape}, Color: ${color}, Size: ${size}`);
-    saveState(); // Save the current state for undo/redo
+    saveState();  
 
     let shapeObject: fabric.Object | null = null;
 
@@ -175,73 +169,112 @@ const Canvas = forwardRef<CanvasHandle>((_, ref) => {
     }
   };
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
+useEffect(() => {
+  if (!canvasRef.current) return;
+ 
+  canvasInstance.current = new fabric.Canvas(canvasRef.current, {
+    preserveObjectStacking: true,
+    selection: true,
+  });
 
-    canvasInstance.current = new fabric.Canvas(canvasRef.current, {
-      preserveObjectStacking: true,
-      selection: true,
-    });
+  
+  saveState();
+ 
+  const resizeCanvas = () => {
+    if (canvasInstance.current) {
+      canvasInstance.current.setDimensions({
+        width: window.innerWidth - 350,
+        height: 450,
+      });
+      canvasInstance.current.renderAll();
+    }
+  };
 
-    const resizeCanvas = () => {
-      if (canvasInstance.current) {
-        canvasInstance.current.setDimensions({
-          width: window.innerWidth - 350,
-          height: 450,
-        });
-        canvasInstance.current.renderAll();
-      }
-    };
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+ 
+  canvasInstance.current.on('selection:created', (e: fabric.IEvent) => {
+    const target = e.target;
+    if (target) {
+      setActiveObject(target);
+    }
+  });
 
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+  canvasInstance.current.on('selection:cleared', () => {
+    setActiveObject(null);
+  });
 
-    canvasInstance.current.on('selection:created', (e: fabric.IEvent) => {
-      const target = e.target;
-      if (target) {
-        setActiveObject(target);
-      }
-    });
+ 
+  const handleObjectAdded = () => {
+    console.log("Object added to canvas");
+    saveState();
+  };
+  const handleObjectModified = () => {
+    console.log("Object modified on canvas");
+    saveState();
+  };
+  const handleObjectRemoved = () => {
+    console.log("Object removed from canvas");
+    saveState();
+  };
 
-    canvasInstance.current.on('selection:cleared', () => {
-      setActiveObject(null);
-    });
+  canvasInstance.current.on('object:added', handleObjectAdded);
+  canvasInstance.current.on('object:modified', handleObjectModified);
+  canvasInstance.current.on('object:removed', handleObjectRemoved);
 
-    return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      canvasInstance.current?.dispose();
-    };
-  }, []);
+  // Clean up listeners and dispose of canvas on unmount
+  return () => {
+    window.removeEventListener('resize', resizeCanvas);
+    canvasInstance.current?.off('object:added', handleObjectAdded);
+    canvasInstance.current?.off('object:modified', handleObjectModified);
+    canvasInstance.current?.off('object:removed', handleObjectRemoved);
+    canvasInstance.current?.dispose();
+  };
+}, []);
+
 
   const saveState = () => {
-    const state = JSON.stringify(canvasInstance.current?.toJSON());
-    undoStack.current.push(state);
-    redoStack.current = [];
-  };
-
-  const undo = () => {
-    if (undoStack.current.length > 0) {
-      const state = undoStack.current.pop();
-      if (state) {
-        redoStack.current.push(JSON.stringify(canvasInstance.current?.toJSON()));
-        canvasInstance.current?.loadFromJSON(state, () => {
-          canvasInstance.current?.renderAll();
-        });
-      }
+    const currentState = JSON.stringify(canvasInstance.current?.toJSON());
+    if (currentState) {
+      undoStack.current.push(currentState);
+      redoStack.current = []; // Clear redoStack when a new action is taken
+      console.log("State saved to undoStack:", undoStack.current); // Debugging log
     }
   };
-
+  
+  const undo = () => {
+    if (undoStack.current.length > 1) { // Ensure there's a previous state
+      const currentState = undoStack.current.pop();
+      if (currentState) {
+        redoStack.current.push(currentState); // Move current state to redoStack
+        const previousState = undoStack.current[undoStack.current.length - 1];
+        console.log("Undoing to previous state:", previousState); // Debugging log
+        canvasInstance.current?.loadFromJSON(previousState, () => {
+          canvasInstance.current?.renderAll();
+          console.log("Canvas reloaded from previous state"); // Confirm canvas reload
+        });
+      }
+    } else {
+      console.log("No more states to undo"); // Debugging log
+    }
+  };
+  
   const redo = () => {
     if (redoStack.current.length > 0) {
-      const state = redoStack.current.pop();
-      if (state) {
-        undoStack.current.push(JSON.stringify(canvasInstance.current?.toJSON()));
-        canvasInstance.current?.loadFromJSON(state, () => {
+      const redoState = redoStack.current.pop();
+      if (redoState) {
+        undoStack.current.push(redoState); // Move redo state back to undoStack
+        console.log("Redoing to next state:", redoState); // Debugging log
+        canvasInstance.current?.loadFromJSON(redoState, () => {
           canvasInstance.current?.renderAll();
+          console.log("Canvas reloaded from redo state"); // Confirm canvas reload
         });
       }
+    } else {
+      console.log("No more states to redo"); // Debugging log
     }
   };
+  
 
   const setTextAlignment = (alignment: 'left' | 'center' | 'right') => {
     const activeObject = canvasInstance.current?.getActiveObject();

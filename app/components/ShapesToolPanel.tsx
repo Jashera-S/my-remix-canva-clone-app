@@ -99,8 +99,8 @@ const ShapesToolPanel: React.FC<ShapesToolPanelProps> = ({ isOpen, onClose, onCr
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
           onClick={() => {
-            onCreateShape(selectedShape, shapeColor, shapeSize); // Pass shape data to canvas
-            onClose(); // Close the panel after creating the shape
+            onCreateShape(selectedShape, shapeColor, shapeSize);
+            onClose();
           }}
         >
           Add Shape

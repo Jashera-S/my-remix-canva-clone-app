@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
-import axios from 'axios';
 
 interface ImagesToolPanelProps {
   isOpen: boolean;
@@ -12,17 +11,14 @@ const ImagesToolPanel: React.FC<ImagesToolPanelProps> = ({ isOpen, onClose, addI
   const [images, setImages] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('animals');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  // Example categories
+  
   const categories = ['animals', 'cats', 'landscapes', 'food'];
 
-  // Fetch images based on selected category
   useEffect(() => {
     const fetchImages = async () => {
       try {
         let staticImages: string[] = [];
 
-        // Static images for each category
         switch (selectedCategory) {
           case 'animals':
             staticImages = [
@@ -72,11 +68,11 @@ const ImagesToolPanel: React.FC<ImagesToolPanelProps> = ({ isOpen, onClose, addI
             break;
         }
 
-        setImages(staticImages); // Set static images for the selected category
+        setImages(staticImages);
         setSelectedImage(null);
       } catch (error) {
         console.error("Error fetching images:", error);
-        setImages([]); // Clear images in case of an error
+        setImages([]);
       }
     };
 
@@ -108,8 +104,6 @@ const ImagesToolPanel: React.FC<ImagesToolPanelProps> = ({ isOpen, onClose, addI
 
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">Image Options</h2>
-
-        {/* Category Selection */}
         <div className="mb-4 flex flex-wrap">
           {categories.map((category) => (
             <button
@@ -124,7 +118,6 @@ const ImagesToolPanel: React.FC<ImagesToolPanelProps> = ({ isOpen, onClose, addI
           ))}
         </div>
 
-        {/* Image List */}
         <h3 className="text-lg font-semibold mb-3">Select an Image</h3>
         <div className="grid grid-cols-2 gap-2">
           {images.map((imageUrl, index) => (
@@ -140,7 +133,6 @@ const ImagesToolPanel: React.FC<ImagesToolPanelProps> = ({ isOpen, onClose, addI
           ))}
         </div>
 
-        {/* Selected Image Preview and Add Button */}
         {selectedImage && (
           <div className="mt-4">
             <h3 className="text-lg font-semibold mb-2">Selected Image</h3>
